@@ -36,25 +36,27 @@ function question1() {
         message: "What is the ID of the product you'd like to buy?"
         }
     ).then(function(answer){
-        var query = "SELECT id FROM products";
-        connection.query(query, function(err, res) {
-            if (err) throw err;
-            var idString;
-            var productId= answer.idChoice;
-            for (i=0; i < res.length; i++) {
-                idString =+ " " + res[i].id;
-                var indexString = idString.indexOf(answer.idChoice);
-                console.log(idString);
-                if (indexString === -1) {
-                    console.log("That id can not be found. Please choose again");                    
-                    question1();
-                } else {
-                    return question2();
-                };
-            };
-        });
+        idFind(answer);
     });
 };
+
+function idFind(answer) {
+    var query = "SELECT id FROM products";
+    connection.query(query, function(err, res) {
+        if (err) throw err;
+        var productId= parseInt(answer.idChoice);
+        var idArray = [];
+        for (var i=0; i < res.length; i++) {
+            idArray.push(res[i].id);
+        };
+        if (idArray.includes(productId)) {
+            return question2(productId);
+        } else {
+            console.log("That id can not be found. Please choose again");                    
+            return question1();
+        };
+    });
+}
 
 function question2() {
     inquirer.prompt(
@@ -64,10 +66,28 @@ function question2() {
         message: "How much would you like to purchase?"
         }
     ).then(function(answer){
-        var query = "SELECT id, stock_quantity FROM products WHERE ?";
-        connection.query(query, { id: productId }, function(err, res) {
-
-        })
+        sellProducts(answer);
     })
     
 }
+
+function sellProducts(answer){
+    var query = "SELECT id, price, stock_quantity FROM products WHERE ?";
+    connection.query(query, { id: productId }, function(err, res) {
+        if (err) throw err;
+        if (isNanN(parseInt(answer))) {
+            console.log("choose a number please");
+            question2();
+        } else if (parseInt(answer) > res.stock_quantity) {
+            console.log("We don't have that much in stock sorry!")
+            question2();
+        } else {
+            var cost = parseInt(answer) * res.price;
+            console.log("That'll be $" + cost + ".")
+            removeProducts();
+        }
+
+    })
+}
+
+function rem

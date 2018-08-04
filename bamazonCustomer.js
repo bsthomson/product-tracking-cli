@@ -43,8 +43,9 @@ function question1() {
             var productId= answer.idChoice;
             for (i=0; i < res.length; i++) {
                 idString =+ " " + res[i].id;
+                var indexString = idString.indexOf(answer.idChoice);
                 console.log(idString);
-                if (idString.indexOf(answer.idChoice) === -1) {
+                if (indexString === -1) {
                     console.log("That id can not be found. Please choose again");                    
                     question1();
                 } else {

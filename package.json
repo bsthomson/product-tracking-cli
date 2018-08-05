@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/bsthomson/product-tracking-cli#readme",
   "dependencies": {
+    "cli-table": "^0.3.1",
     "inquirer": "^6.0.0",
     "mysql": "^2.16.0"
   }

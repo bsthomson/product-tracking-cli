@@ -1,6 +1,15 @@
+// Imported Modules
 const inquirer = require('inquirer');
 const mysql = require('mysql');
+const Table = require('cli-table');
 
+
+// Table variable for cli-table module
+var table = new Table({
+    head: ['Id', 'Product', 'Price', 'Quantity']
+});
+
+// Connection variable for mysql module
 var connection = mysql.createConnection({
     host     : 'localhost',
     port     : 3306,
@@ -13,25 +22,29 @@ var productId;
 var amount;
 var total;
 
-function showProduct() {
-    console.log("Here are our products!\n");
-    connection.query("SELECT * FROM products", function(err, res) {
-      if (err) throw err;
-      // Log all results of the SELECT statement
-      console.log("Id --- Product --- Price --- Quantity")
-      for (i=0; i < res.length; i++) {
-      console.log(res[i].id + " --- " + res[i].product_name + " --- $" + res[i].price + " --- " + res[i].stock_quantity);
-      }
-    question1();
-    });
-};
-
+// Connects to the server
 connection.connect(function(err) {
     if (err) throw err;
     console.log("connected as id " + connection.threadId + "\n");
     showProduct();
-  });
+});
 
+// Show the products using the cli-table module
+function showProduct() {
+    console.log("Here are our products!\n");
+    connection.query("SELECT * FROM products", function(err, res) {
+      if (err) throw err;
+      for (i=0; i < res.length; i++) {
+          table.push(
+                [res[i].id, res[i].product_name, "$" + res[i].price, res[i].stock_quantity]
+          );
+      };
+      console.log(table.toString());
+    question1();
+    });
+};
+
+// function that uses inquirer to ask the first question
 function question1() {
   inquirer.prompt(
         {
@@ -44,6 +57,7 @@ function question1() {
     });
 };
 
+// function to make sure that the item id exists
 function idFind(answer) {
     var query = "SELECT id FROM products";
     connection.query(query, function(err, res) {
@@ -62,6 +76,7 @@ function idFind(answer) {
     });
 };
 
+// 2nd question that is asked if the id exists
 function question2() {
     inquirer.prompt(
         {
@@ -75,6 +90,9 @@ function question2() {
     
 };
 
+
+// Function that sells the user X amount of items while making sure they both use a number
+// and ask for a quantity less than what's in the database
 function sellProducts(answer){
     var query = "SELECT id, price, stock_quantity FROM products WHERE ?";
     connection.query(query, { id: productId }, function(err, res) {
@@ -95,6 +113,7 @@ function sellProducts(answer){
     });
 };
 
+// removes the amount of products the user decided to buy
 function removeProducts(){
     var query = "UPDATE products SET ? WHERE ?";
     connection.query(query,
